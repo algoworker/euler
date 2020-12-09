@@ -35,62 +35,61 @@ config.gpu_options.allow_growth = True
 
 def define_network_embedding_flags():
   tf.flags.DEFINE_enum('mode', 'train',
-                       ['train', 'evaluate', 'save_embedding'], 'Run mode.')
+                       ['train', 'evaluate', 'save_embedding'], 'Run mode.')  # 指定运行模式: train/evaluate/save_embedding,默认值为train
 
-  tf.flags.DEFINE_string('data_dir', '', 'Local Euler graph data.')
-  tf.flags.DEFINE_integer('train_node_type', 0, 'Node type of training set.')
+  tf.flags.DEFINE_string('data_dir', '', 'Local Euler graph data.')  # 指定图数据位置,必须
+  tf.flags.DEFINE_integer('train_node_type', 0, 'Node type of training set.')  # 训练集顶点类型,默认0
   tf.flags.DEFINE_integer('all_node_type', euler_ops.ALL_NODE_TYPE,
-                          'Node type of the whole graph.')
-  tf.flags.DEFINE_list('train_edge_type', [0], 'Edge type of training set.')
+                          'Node type of the whole graph.')  # 全集顶点类型,默认-1
+  tf.flags.DEFINE_list('train_edge_type', [0], 'Edge type of training set.')  # 训练集边类型,默认[0]
   tf.flags.DEFINE_list('all_edge_type', [0, 1, 2],
-                       'Edge type of the whole graph.')
-  tf.flags.DEFINE_integer('max_id', -1, 'Max node id.')
-  tf.flags.DEFINE_integer('feature_idx', -1, 'Feature index.')
-  tf.flags.DEFINE_integer('feature_dim', 0, 'Feature dimension.')
-  tf.flags.DEFINE_integer('label_idx', -1, 'Label index.')
-  tf.flags.DEFINE_integer('label_dim', 0, 'Label dimension.')
-  tf.flags.DEFINE_integer('num_classes', None, 'Number of classes.')
-  tf.flags.DEFINE_list('id_file', [], 'Files containing ids to evaluate.')
+                       'Edge type of the whole graph.')  # 全集边类型,默认[0,1]
+  tf.flags.DEFINE_integer('max_id', -1, 'Max node id.')  # 图中最大的顶点id,必须
+  tf.flags.DEFINE_integer('feature_idx', -1, 'Feature index.')  # 稠密特征的编号,使用稠密特征必须
+  tf.flags.DEFINE_integer('feature_dim', 0, 'Feature dimension.')  # 稠密特征维度,使用稠密特征必须
+  tf.flags.DEFINE_integer('label_idx', -1, 'Label index.')  # label在稠密特征中的编号,监督模型必须
+  tf.flags.DEFINE_integer('label_dim', 0, 'Label dimension.')  # label在稠密特征中的维度,监督模型必须
+  tf.flags.DEFINE_integer('num_classes', None, 'Number of classes.')  # 分类个数,label为标量时必须
+  tf.flags.DEFINE_list('id_file', [], 'Files containing ids to evaluate.')  # 测试集id文件,一行一个id,evaluate必须
 
-  tf.flags.DEFINE_string('model', 'graphsage_supervised', 'Embedding model.')
-  tf.flags.DEFINE_boolean('sigmoid_loss', True, 'Whether to use sigmoid loss.')
+  tf.flags.DEFINE_string('model', 'graphsage_supervised', 'Embedding model.')  # 模型名称,支持line/randomwalk/graphsage/graphsage_supervised/scalable_gcn/gat/saved_embedding
+  tf.flags.DEFINE_boolean('sigmoid_loss', True, 'Whether to use sigmoid loss.')  # 使用sigmoid或者softmax作为损失函数,默认sigmoid_loss
   tf.flags.DEFINE_boolean('xent_loss', True, 'Whether to use xent loss.')
-  tf.flags.DEFINE_integer('dim', 256, 'Dimension of embedding.')
+  tf.flags.DEFINE_integer('dim', 256, 'Dimension of embedding.')  # embedding宽度,默认256
   tf.flags.DEFINE_integer('num_negs', 5, 'Number of negative samplings.')
-  tf.flags.DEFINE_integer('order', 1, 'LINE order.')
+  tf.flags.DEFINE_integer('order', 1, 'LINE order.')  # LINE模型的阶数,默认1阶
   tf.flags.DEFINE_integer('walk_len', 5, 'Length of random walk path.')
-  tf.flags.DEFINE_float('walk_p', 1., 'Node2Vec return parameter.')
-  tf.flags.DEFINE_float('walk_q', 1., 'Node2Vec in-out parameter.')
+  tf.flags.DEFINE_float('walk_p', 1., 'Node2Vec return parameter.')  # Node2Vec模型的参数p
+  tf.flags.DEFINE_float('walk_q', 1., 'Node2Vec in-out parameter.')  # Node2Vec模型的参数q
   tf.flags.DEFINE_integer('left_win_size', 5, 'Left window size.')
   tf.flags.DEFINE_integer('right_win_size', 5, 'Right window size.')
-  tf.flags.DEFINE_list('fanouts', [10, 10], 'GCN fanouts.')
+  tf.flags.DEFINE_list('fanouts', [10, 10], 'GCN fanouts.')  # GraphSage/GraphSage(Supervised)/ScalableGCN模型的参数,每层的扩展数,默认[10,10]
   tf.flags.DEFINE_enum('aggregator', 'mean',
                        ['gcn', 'mean', 'meanpool', 'maxpool', 'attention'],
-                       'Sage aggregator.')
-  tf.flags.DEFINE_boolean('concat', True, 'Sage aggregator concat.')
+                       'Sage aggregator.')  # GraphSage/GraphSage(Supervised)/ScalableGCN模型的参数,汇聚类型,支持gcn/mean/meanpool/maxpool,默认mean
+  tf.flags.DEFINE_boolean('concat', True, 'Sage aggregator concat.')  # GraphSage/GraphSage(Supervised)/ScalableGCN模型的参数,汇聚方法,默认concat
   tf.flags.DEFINE_boolean('use_residual', False, 'Whether use skip connection.')
   tf.flags.DEFINE_float('store_learning_rate', 0.001, 'Learning rate of store.')
   tf.flags.DEFINE_float('store_init_maxval', 0.05,
                         'Max initial value of store.')
-  tf.flags.DEFINE_integer('head_num', 1, 'multi head attention num')
+  tf.flags.DEFINE_integer('head_num', 1, 'multi head attention num')  # GAT模型的参数,attention head数目,默认1
 
-  tf.flags.DEFINE_string('model_dir', 'ckpt', 'Model checkpoint.')
-  tf.flags.DEFINE_integer('batch_size', 512, 'Mini-batch size.')
-  tf.flags.DEFINE_string('optimizer', 'adam', 'Optimizer to use.')
-  tf.flags.DEFINE_float('learning_rate', 0.01, 'Learning rate.')
-  tf.flags.DEFINE_integer('num_epochs', 20, 'Number of epochs for training.')
-  tf.flags.DEFINE_integer('log_steps', 20, 'Number of steps to print log.')
+  tf.flags.DEFINE_string('model_dir', 'ckpt', 'Model checkpoint.')  # checkpoint路径,默认ckpt
+  tf.flags.DEFINE_integer('batch_size', 512, 'Mini-batch size.')  # batch_size,默认512
+  tf.flags.DEFINE_string('optimizer', 'adam', 'Optimizer to use.')  # 优化器,默认adam,使用adam训练速度很慢
+  tf.flags.DEFINE_float('learning_rate', 0.01, 'Learning rate.')  # 学习率,默认0.01
+  tf.flags.DEFINE_integer('num_epochs', 20, 'Number of epochs for training.')  # 训练顶点轮数,默认10
+  tf.flags.DEFINE_integer('log_steps', 20, 'Number of steps to print log.')  # 日志打印间隔步数,默认20
 
-  tf.flags.DEFINE_list('ps_hosts', [], 'Parameter servers.')
-  tf.flags.DEFINE_list('worker_hosts', [], 'Training workers.')
-  tf.flags.DEFINE_string('job_name', '', 'Cluster role.')
-  tf.flags.DEFINE_integer('task_index', 0, 'Task index.')
+  tf.flags.DEFINE_list('ps_hosts', [], 'Parameter servers.')  # ps列表,分布式训练必须
+  tf.flags.DEFINE_list('worker_hosts', [], 'Training workers.')  # worker列表,分布式训练必须
+  tf.flags.DEFINE_string('job_name', '', 'Cluster role.')  # task_name,角色名称,ps或worker,分布式训练必须；
+  tf.flags.DEFINE_integer('task_index', 0, 'Task index.')  # 角色索引,分布式训练必须
 
   tf.flags.DEFINE_string('euler_zk_addr', '127.0.0.1:2181',
-                         'Euler ZK registration service.')
+                         'Euler ZK registration service.')  # ZooKeeper地址,分布式训练必须
   tf.flags.DEFINE_string('euler_zk_path', '/tf_euler',
-                         'Euler ZK registration node.')
-
+                         'Euler ZK registration node.')  # ZooKeeper节点,分布式训练必须
 
 def run_train(model, flags_obj, master, is_chief):
   utils_context.training = True

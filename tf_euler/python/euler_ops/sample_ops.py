@@ -24,7 +24,7 @@ import tensorflow as tf
 
 from tf_euler.python.euler_ops import base
 
-ALL_NODE_TYPE = -1
+ALL_NODE_TYPE = -1  # int,作为node_type传入tf_euler.sample_node作全类型采样
 
 sample_node = base._LIB_OP.sample_node
 sample_edge = base._LIB_OP.sample_edge
@@ -36,6 +36,11 @@ def _iter_body(i, state):
   out_ta = ta.write(i, curr_result)
   return i+1, (y, count, n, out_ta)
 
+"""
+可以根据src_node的type决定采样哪些type的node,返回2-D int64 tf.Tensor,采样结果shape: [src_node_count,n]
+src_nodes: 1-D int64 tf.Tensor,src node ID,用于决定采样哪些type,shape: [src_node_count]
+n: 0-D int32 tf.Tensor,每个src id采样的数目
+"""
 def sample_node_with_src(src_nodes, n, share_sample=False):
   """
   for each src node, sample "n" nodes with the same type

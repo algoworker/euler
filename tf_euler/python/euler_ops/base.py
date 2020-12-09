@@ -54,6 +54,11 @@ def initialize_graph(config):
   return _LIB.CreateGraph(config)
 
 
+"""
+加载一份完整的图并独立使用,返回bool,表示图是否初始化成功
+directory: 图数据路径,目前embedded模式仅支持unix文件系统
+graph_type: graph类型,compact/fast,默认compact
+"""
 def initialize_embedded_graph(directory, graph_type='compact'):
   return initialize_graph({'mode': 'Local',
                            'directory': directory,
@@ -61,6 +66,17 @@ def initialize_embedded_graph(directory, graph_type='compact'):
 
 
 # TODO: Consider lower the concept of shared graph to euler client.
+"""
+在不同的worker之间自动的进行图数据的切分和共享,返回bool,表示图是否初始化成功
+directory: 图数据路径,目前shared模式仅支持HDFS
+zk_addr: Zookeeper地址,ip:port
+zk_path: Zookeeper根节点,用于协调各个shard
+shard_idx: shard编号
+shard_num: shard总数
+global_sampler_type: 全局采样类型,all/node/edge/none,默认node
+graph_type: graph类型,compact/fast,默认compact
+server_thread_num: euler service线程数,默认4
+"""
 def initialize_shared_graph(directory, zk_addr, zk_path, shard_idx, shard_num,
                             global_sampler_type='node', graph_type='compact',
                             server_thread_num=4):
