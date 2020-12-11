@@ -166,9 +166,9 @@ std::unique_ptr<Graph> Graph::NewGraph(const GraphConfig& config) {
   std::string mode;
   config.Get("mode", &mode);
   if (kLocalGraphMode == mode) {
-    graph = new LocalGraph();
+    graph = new LocalGraph();  // new一个LocalGraph对象
   } else if (kRemoteGraphMode == mode) {
-    graph = new RemoteGraph();
+    graph = new RemoteGraph();  // new一个RemoteGraph对象
   } else {
     LOG(ERROR) << "Invlaid mode got: " << mode;
     return nullptr;
@@ -176,7 +176,7 @@ std::unique_ptr<Graph> Graph::NewGraph(const GraphConfig& config) {
 
   std::string init = "instant";
   config.Get("init", &init);
-  if (init != "lazy" && !graph->Initialize(config)) {
+  if (init != "lazy" && !graph->Initialize(config)) {  // 利用config初始化图,config是将conf的内容解析后添加到GraphConfig的对象的结果
     LOG(ERROR) << "Initialize graph failed, config: " << config.DebugString();
     graph = nullptr;
   }

@@ -79,7 +79,7 @@ bool GraphConfig::Get(const std::string& key, int* value) const {
 
 void GraphConfig::Add(const std::string& key,
                       const std::string& value) {
-  config_.insert({key, value});
+  config_.insert({key, value});  // config_是GraphConfig类的私有对象
 }
 
 void GraphConfig::Add(const std::string& key, int value) {

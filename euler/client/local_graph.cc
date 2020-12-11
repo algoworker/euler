@@ -37,8 +37,8 @@ bool LocalGraph::Initialize(const GraphConfig& config) {
   if (config.Get("load_type", &load_type) && load_type == "fast") {
     graph_type = euler::core::fast;
   }
-  engine_ = new euler::core::GraphEngine(graph_type);
-  if (!engine_->Initialize(directory)) {
+  engine_ = new euler::core::GraphEngine(graph_type);  // new一个GraphEngine对象engine_
+  if (!engine_->Initialize(directory)) {  // 使用data_dir初始化Local图: 调用GraphEngine::Initialize(std::unordered_map<std::string,std::string> conf)
     LOG(ERROR) << "Initialize local graph engine failed, config: "
                << config.DebugString();
     engine_ = nullptr;

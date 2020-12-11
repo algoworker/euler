@@ -49,7 +49,7 @@ def initialize_graph(config):
   """
   if isinstance(config, dict):
     config = ';'.join(
-        '{}={}'.format(key, value) for key, value in config.items())
+        '{}={}'.format(key, value) for key, value in config.items())  # config是一个字符串: "directory=data_dir;load_type=compact;mode=Local"
   if not isinstance(config, str):
     raise TypeError('Expect str or dict for graph config, '
                     'got {}.'.format(type(config).__name__))
