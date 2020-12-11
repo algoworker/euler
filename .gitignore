@@ -6,3 +6,7 @@
 build/
 ckpt/
 dist/
+
+# following code edited by algoworker
+.idea/
+cmake-build-debug
