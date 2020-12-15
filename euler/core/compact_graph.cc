@@ -34,13 +34,13 @@ CompactGraph::SampleNode(int32_t node_type, int32_t count) const {
     LOG(ERROR) << "global sampler is not initialized!";
   }
   std::vector<euler::common::NodeID> vec;
-  vec.reserve(count);
-  if (node_type == -1) {
-    if (node_type_collection_.GetSumWeight() == 0) {
+  vec.reserve(count);  // 改变vec的容量
+  if (node_type == -1) {  // 全集顶点类型
+    if (node_type_collection_.GetSumWeight() == 0) {  // euler::common::FastWeightedCollection<int32_t> node_type_collection_;
       return vec;
     }
     for (int32_t i = 0; i < count; i++) {
-      node_type = node_type_collection_.Sample().first;
+      node_type = node_type_collection_.Sample().first;  // compact graph use binary search sampling, fast graph use alias method sampling
       vec.push_back(node_samplers_[node_type].Sample().first);
     }
   }

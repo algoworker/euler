@@ -64,7 +64,7 @@ bool GraphBuilder::LoadData(LoaderType loader_type,
       }
       file_io_factory = euler::common::factory_map["hdfs"];
     }
-    reader = file_io_factory->GetFileIO(config);
+    reader = file_io_factory->GetFileIO(config);  // 解析配置文件初始化reader
     if (reader == nullptr) {
       LOG(ERROR) << file_list[i] << " reader error!";
       return false;
@@ -88,16 +88,16 @@ Graph* GraphBuilder::BuildGraph(const std::vector<std::string>& file_names,
                                 LoaderType loader_type, std::string addr,
                                 int32_t port,
                                 GlobalSamplerType global_sampler_type) {
-  int THREAD_NUM = std::thread::hardware_concurrency();
+  int THREAD_NUM = std::thread::hardware_concurrency();  // 获取硬件支持的并发线程数
   Graph* graph = factory_->CreateGraph();
   bool load_success = true;
   std::vector<std::thread> thread_list;
   int p_num = file_names.size() / THREAD_NUM + 1;
-  NODEVEC tmp_node_vec[THREAD_NUM];
-  EDGEVEC tmp_edge_vec[THREAD_NUM];
+  NODEVEC tmp_node_vec[THREAD_NUM];  // typedef std::vector<Node*> NODEVEC;
+  EDGEVEC tmp_edge_vec[THREAD_NUM];  // typedef std::vector<Edge*> EDGEVEC;
   int32_t n_type_num[THREAD_NUM];
   int32_t e_type_num[THREAD_NUM];
-  memset(n_type_num, 0, sizeof(n_type_num));
+  memset(n_type_num, 0, sizeof(n_type_num));  // memset()将n_type_num所指向的某一块内存的sizeof(n_type_num)个字节的内容全部设置为0
   memset(e_type_num, 0, sizeof(e_type_num));
   for (int i = 0; i < THREAD_NUM; ++i) {
     std::vector<std::string> file_list;
@@ -112,17 +112,17 @@ Graph* GraphBuilder::BuildGraph(const std::vector<std::string>& file_names,
         [this, loader_type, file_list, graph, addr, port,i, &tmp_node_vec, &tmp_edge_vec,
         &n_type_num, &e_type_num] (bool* success) {
           *success = *success && LoadData(loader_type, file_list, graph, addr, port, tmp_node_vec[i],
-                                          tmp_edge_vec[i], n_type_num[i], e_type_num[i]);
+                                          tmp_edge_vec[i], n_type_num[i], e_type_num[i]);  // 每个线程一个tmp_node_vec[]数组和一个tmp_edge_vec[]数组
         }, &load_success));
   }
   for (int i = 0; i < THREAD_NUM; ++i) {
-    thread_list[i].join();
+    thread_list[i].join();  // join(): 等待被创建线程结束并回收线程的资源,这里是循环回收所有线程资源
   }
 
   int64_t node_size = 0, edge_size = 0;
   for(int i = 0 ; i < THREAD_NUM ; i++) {
-    node_size += tmp_node_vec[i].size();
-    edge_size += tmp_edge_vec[i].size();
+    node_size += tmp_node_vec[i].size();  // node_size累加每个线程处理的顶点数
+    edge_size += tmp_edge_vec[i].size();  // edge_size累加每个线程处理的边数
   }
   LOG(INFO) << "Each Thread Load Finish! Node Count:" << node_size<< " Edge Count:"<< edge_size;
 
@@ -172,17 +172,17 @@ bool GraphBuilder::ParseBlock(euler::common::FileIO* file_io, Graph* graph,
     return false;
   }
 
-  if (!file_io->Read(static_cast<size_t>(node_info_bytes), &node_info)) {
+  if (!file_io->Read(static_cast<size_t>(node_info_bytes), &node_info)) {  // static_cast<type-id>(expression): static_cast运算符把expression转换为type-id类型
     return false;
   }
 
-  Node* node = factory_->CreateNode();
-  if (!node->DeSerialize(node_info)) {
+  Node* node = factory_->CreateNode();  // Node* node = new CompactNode() or Node* node = new FastNode(),顶点的结构包含: node_id/node_type/node_weight/neighbor/uint64_feature/float_feature/binary_feature/edge等信息
+  if (!node->DeSerialize(node_info)) {  // DeSerialize(const std::string& data)->DeSerialize(data.c_str(), data.size())
     return false;
   }
 
-  np.push_back(node);
-  int tmp = node->GetType() + 1;
+  np.push_back(node);  // typedef std::vector<Node*> NODEVEC;
+  int tmp = node->GetType() + 1;  // 顶点类型
   n_type_num = tmp > n_type_num ? tmp: n_type_num;
 
   int32_t edges_num = 0;
@@ -200,12 +200,12 @@ bool GraphBuilder::ParseBlock(euler::common::FileIO* file_io, Graph* graph,
     if (!file_io->Read(static_cast<size_t>(byte_num), &edge_info)) {
       return false;
     }
-    Edge* edge = factory_->CreateEdge();
+    Edge* edge = factory_->CreateEdge();  // Edge* edge = new CompactEdge() or Edge* edge = new FastEdge(),边的结构包含: edge_type/weight/uint64_feature/float_feature/binary_feature
     if (!edge->DeSerialize(edge_info)) {
       return false;
     }
     ep.push_back(edge);
-    int tmp_e = edge->GetType() + 1;
+    int tmp_e = edge->GetType() + 1;  // 边类型
     e_type_num = tmp_e > e_type_num ? tmp_e: e_type_num;
   }
   int32_t total_edges_info_bytes = 0;

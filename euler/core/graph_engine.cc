@@ -45,8 +45,8 @@ bool GraphEngine::Initialize(std::unordered_map<std::string,
   std::string directory = conf["directory"];
   LoaderType loader_type = conf["loader_type"] == "local" ? local : hdfs;
   std::string hdfs_addr = conf["hdfs_addr"];
-  int32_t hdfs_port = atoi(conf["hdfs_port"].c_str());
-  int32_t shard_idx = atoi(conf["shard_idx"].c_str());
+  int32_t hdfs_port = atoi(conf["hdfs_port"].c_str());  // c_str(): 返回一个指向正规C字符串的指针常量,内容与本string串相同
+  int32_t shard_idx = atoi(conf["shard_idx"].c_str());  // atoi(): 把字符串转换成整型数
   int32_t shard_num = atoi(conf["shard_num"].c_str());
   GlobalSamplerType global_sampler_type =
       conf["global_sampler_type"] == "node" ? node : (
@@ -54,7 +54,7 @@ bool GraphEngine::Initialize(std::unordered_map<std::string,
       conf["global_sampler_type"] == "none" ? none : all));
   // using graph builder init graph
   euler::common::FileIOFactory* file_io_factory = nullptr;
-  std::function<bool(std::string input)> full_file_filter_fn = {};
+  std::function<bool(std::string input)> full_file_filter_fn = {};  // std::function的本质是一个类模板,通常std::function是一个函数对象类,full_file_filter_fn的本质是一个对象
   if (loader_type == local) {
     if (euler::common::factory_map.find("local") ==
         euler::common::factory_map.end()) {
@@ -62,7 +62,7 @@ bool GraphEngine::Initialize(std::unordered_map<std::string,
       return false;
     }
     file_io_factory = euler::common::factory_map["local"];
-    full_file_filter_fn = [](std::string input) {
+    full_file_filter_fn = [](std::string input) {  // lambda表达式: [捕获外部变量列表] (形参列表) { function body }
       std::vector<std::string> file_name_vec;
       int32_t cnt = euler::common::split_string(input, '.',
                                                 &file_name_vec);
@@ -110,13 +110,13 @@ bool GraphEngine::Initialize(std::unordered_map<std::string,
     return false;
   }
   GraphFactory* graph_factory = nullptr;
-  if (graph_type_ == compact) {
+  if (graph_type_ == compact) {  // 默认graph_type是compact
     graph_factory = new CompactGraphFactory();
   } else {
     graph_factory = new FastGraphFactory();
   }
-  GraphBuilder graph_builder(graph_factory);
-  graph_ = graph_builder.BuildGraph(
+  GraphBuilder graph_builder(graph_factory);  // 使用graph_factory对象构造GraphBuilder对象graph_builder
+  graph_ = graph_builder.BuildGraph(  // graph_是GraphBuilder类的私有属性
       file_list, loader_type, hdfs_addr, hdfs_port, global_sampler_type);
 
   if (graph_ != nullptr) {

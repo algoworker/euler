@@ -99,10 +99,10 @@ def run_train(model, flags_obj, master, is_chief):
   batch_size = flags_obj.batch_size // model.batch_size_ratio
   if flags_obj.model == 'line' or flags_obj.model == 'randomwalk':
     source = euler_ops.sample_node(
-        count=batch_size, node_type=flags_obj.all_node_type)
+        count=batch_size, node_type=flags_obj.all_node_type)  # all_node_type: 全集顶点类型
   else:
     source = euler_ops.sample_node(
-        count=batch_size, node_type=flags_obj.train_node_type)
+        count=batch_size, node_type=flags_obj.train_node_type)  # train_node_type: 训练集顶点类型
   source.set_shape([batch_size])
   _, loss, metric_name, metric = model(source)
 
@@ -120,22 +120,22 @@ def run_train(model, flags_obj, master, is_chief):
 
   num_steps = int((flags_obj.max_id + 1) // flags_obj.batch_size *
                    flags_obj.num_epochs)
-  hooks.append(tf.train.StopAtStepHook(last_step=num_steps))
+  hooks.append(tf.train.StopAtStepHook(last_step=num_steps))  # tf.train.StopAtStepHook: 在一定步数停止,last_step是终止步数
 
   if len(flags_obj.worker_hosts) == 0 or flags_obj.task_index == 1:
     hooks.append(
-        tf.train.ProfilerHook(save_secs=180, output_dir=flags_obj.model_dir))
+        tf.train.ProfilerHook(save_secs=180, output_dir=flags_obj.model_dir))  # tf.train.ProfilerHook(): 每N步或N秒统计一次CPU/GPU的profiling信息
   if len(flags_obj.worker_hosts):
     hooks.append(utils_hooks.SyncExitHook(len(flags_obj.worker_hosts)))
   if hasattr(model, 'make_session_run_hook'):
     hooks.append(model.make_session_run_hook())
 
-  with tf.train.MonitoredTrainingSession(
-      master=master,
-      is_chief=is_chief,
+  with tf.train.MonitoredTrainingSession(  # tf.train.MonitoredTrainingSession(): 用于管理分布式训练
+      master=master,  # master: the TensorFlow master to use
+      is_chief=is_chief,  # is_chief: 用于分布式系统中,if(true),它将负责初始化并恢复底层TensorFlow会话;if(false),它将等待chief初始化或恢复TensorFlow 会话
       checkpoint_dir=flags_obj.model_dir,
       log_step_count_steps=None,
-      hooks=hooks,
+      hooks=hooks,  # SessionRunHook对象的可选列表
       config=config) as sess:
     while not sess.should_stop():
       sess.run(train_op)
@@ -175,14 +175,14 @@ def run_evaluate(model, flags_obj, master, is_chief):
 def run_save_embedding(model, flags_obj, master, is_chief):
   utils_context.training = False
 
-  dataset = tf.data.Dataset.range(flags_obj.max_id + 1)
+  dataset = tf.data.Dataset.range(flags_obj.max_id + 1)  # Dataset.range(5) == [0, 1, 2, 3, 4]
   if master:
     dataset = dataset.shard(len(flags_obj.worker_hosts), flags_obj.task_index)
-  dataset = dataset.batch(flags_obj.batch_size)
-  source = dataset.make_one_shot_iterator().get_next()
-  embedding, _, _, _ = model(source)
+  dataset = dataset.batch(flags_obj.batch_size)  # 将数据组合成batch
+  source = dataset.make_one_shot_iterator().get_next()  # dataset.make_one_shot_iterator():从dataset中实例化了一个iterator,这个iterator中的数据输出一次后就丢弃; iterator.get_next():表示从iterator里取出一个元素
+  embedding, _, _, _ = model(source)  # 调用模型得到embedding,这里source应该是一个batch的数据
 
-  tf.train.get_or_create_global_step()
+  tf.train.get_or_create_global_step()  # 返回或者创建一个全局步数的tensor
   hooks = []
   if master:
     hooks.append(utils_hooks.SyncExitHook(len(flags_obj.worker_hosts)))
