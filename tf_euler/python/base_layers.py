@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright 2018 Alibaba Group Holding Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +38,7 @@ class Layer(object):
   Layer class modeled after Keras (http://keras.io).
   """
 
-  def __init__(self, name=None, **kwargs):
+  def __init__(self, name=None, **kwargs):  # 初始化元信息以及对象所包含的其他Layer
     self.built = False
 
     if name is None:
@@ -45,10 +47,10 @@ class Layer(object):
 
     self._name = name
 
-  def build(self, input_shape):
+  def build(self, input_shape):  # 初始化该对象自身会用到的模型权重,会在__call__()首次执行时被调用
     self.built = True
 
-  def call(self, inputs):
+  def call(self, inputs):  # 将该对象应用到输入中,会在__call__()执行时调用
     return inputs
 
   def __call__(self, inputs):

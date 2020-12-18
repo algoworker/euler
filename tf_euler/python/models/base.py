@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright 2018 Alibaba Group Holding Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,12 +27,21 @@ from tf_euler.python import euler_ops
 from tf_euler.python import layers
 from tf_euler.python import metrics
 
+"""
+所有的Model子类的call方法接受一组源顶点:1-D tf.Tensor,返回一个四元组ModelOutput,其定义为:
+    'embedding': 2-D tf.Tensor,表示输入所对应的embedding
+    'loss': 标量tf.Tensor,表示输入所对应的loss
+    'metric_name': str,表示该模型所用评估指标名称
+    'metric': 标量 tf.Tensor,表示模型的评估指标streaming
+"""
 ModelOutput = collections.namedtuple(
     'ModelOutput', ['embedding', 'loss', 'metric_name', 'metric'])
 
 
 class Model(layers.Layer):
   """
+  python继承: class DerivedClassName(BaseClassName)
+  Euler中所有的图表征学习模型均继承基类Model,而Model进一步的继承Layer,Layer是tf_euler中封装的基本单位.
   """
 
   def __init__(self, **kwargs):
@@ -40,14 +51,14 @@ class Model(layers.Layer):
 
 class UnsupervisedModel(Model):
   """
-  Base model for unsupervised network embedding model.
+  Base model for unsupervised network embedding model. 所有的非监督图表征学习模型继承自类UnsupervisedModel.
   """
 
   def __init__(self,
-               node_type,
-               edge_type,
-               max_id,
-               num_negs=5,
+               node_type,  # int,顶点类型,用于负采样
+               edge_type,  # tf.Tensor,采样目标顶点边类型(多值)
+               max_id,  # int,图中的最大id
+               num_negs=5,  # int,每个源点的负采样个数
                xent_loss=False,
                **kwargs):
     super(UnsupervisedModel, self).__init__(**kwargs)
@@ -180,14 +191,14 @@ class UnsupervisedModelV2(Model):
 
 class SupervisedModel(Model):
   """
-  Base model for supervised network embedding model.
+  Base model for supervised network embedding model. 所有的监督图表征学习模型继承自SupervisedModel.
   """
 
   def __init__(self,
-               label_idx,
-               label_dim,
-               num_classes=None,
-               sigmoid_loss=False,
+               label_idx,  # int,label在稠密特征中的编号
+               label_dim,  # int,label在稠密特征中的维度
+               num_classes=None,   # int,分类个数,label为标量时必须
+               sigmoid_loss=False,  # bool,使用sigmoid或者softmax作为损失函数
                **kwargs):
     super(SupervisedModel, self).__init__()
     self.label_idx = label_idx

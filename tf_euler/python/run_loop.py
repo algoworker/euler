@@ -98,7 +98,7 @@ def run_train(model, flags_obj, master, is_chief):
 
   batch_size = flags_obj.batch_size // model.batch_size_ratio
   if flags_obj.model == 'line' or flags_obj.model == 'randomwalk':
-    source = euler_ops.sample_node(
+    source = euler_ops.sample_node(  # sample_node: 根据配置顶点类型采样负例
         count=batch_size, node_type=flags_obj.all_node_type)  # all_node_type: 全集顶点类型
   else:
     source = euler_ops.sample_node(
@@ -131,8 +131,8 @@ def run_train(model, flags_obj, master, is_chief):
     hooks.append(model.make_session_run_hook())
 
   with tf.train.MonitoredTrainingSession(  # tf.train.MonitoredTrainingSession(): 用于管理分布式训练
-      master=master,  # master: the TensorFlow master to use
-      is_chief=is_chief,  # is_chief: 用于分布式系统中,if(true),它将负责初始化并恢复底层TensorFlow会话;if(false),它将等待chief初始化或恢复TensorFlow 会话
+      master=master,  # master: 用于分布式系统中,指定运行会话协议ip和端口
+      is_chief=is_chief,  # is_chief: 用于分布式系统中,if(true),它将负责初始化并恢复底层TensorFlow会话;if(false),它将等待chief初始化或恢复TensorFlow会话
       checkpoint_dir=flags_obj.model_dir,
       log_step_count_steps=None,
       hooks=hooks,  # SessionRunHook对象的可选列表
@@ -228,14 +228,14 @@ def run_network_embedding(flags_obj, master, is_chief):
     metapath = [map(int, flags_obj.all_edge_type)] * len(fanouts)
 
   if flags_obj.model == 'line':
-    model = models.LINE(
+    model = models.LINE(  # models是一个python包,LINE是类名,这里使用类的名称LINE进行实例化,并通过LINE的__init__()方法接收参数
         node_type=flags_obj.all_node_type,
         edge_type=flags_obj.all_edge_type,
         max_id=flags_obj.max_id,
         dim=flags_obj.dim,
         xent_loss=flags_obj.xent_loss,
         num_negs=flags_obj.num_negs,
-        order=flags_obj.order)
+        order=flags_obj.order)  # 一阶模型or二阶模型,默认1
 
   elif flags_obj.model in ['randomwalk', 'deepwalk', 'node2vec']:
     model = models.Node2Vec(
@@ -245,11 +245,11 @@ def run_network_embedding(flags_obj, master, is_chief):
         dim=flags_obj.dim,
         xent_loss=flags_obj.xent_loss,
         num_negs=flags_obj.num_negs,
-        walk_len=flags_obj.walk_len,
-        walk_p=flags_obj.walk_p,
-        walk_q=flags_obj.walk_q,
-        left_win_size=flags_obj.left_win_size,
-        right_win_size=flags_obj.right_win_size)
+        walk_len=flags_obj.walk_len,  # int,游走长度,默认3
+        walk_p=flags_obj.walk_p,  # int,回采参数,默认1
+        walk_q=flags_obj.walk_q,  # int,外采参数,默认1
+        left_win_size=flags_obj.left_win_size,  # int,左滑动窗口长度,默认1
+        right_win_size=flags_obj.right_win_size)  # int,右滑动窗口长度,默认1
 
   elif flags_obj.model in ['gcn', 'gcn_supervised']:
     model = models.SupervisedGCN(
@@ -270,12 +270,12 @@ def run_network_embedding(flags_obj, master, is_chief):
         label_dim=flags_obj.label_dim,
         num_classes=flags_obj.num_classes,
         sigmoid_loss=flags_obj.sigmoid_loss,
-        edge_type=metapath[0],
-        num_layers=len(fanouts),
+        edge_type=metapath[0],  # 1-D int64 tf.Tensor,边类型集合(多值)
+        num_layers=len(fanouts),  # int,GCN模型层数
         dim=flags_obj.dim,
-        aggregator=flags_obj.aggregator,
-        feature_idx=flags_obj.feature_idx,
-        feature_dim=flags_obj.feature_dim,
+        aggregator=flags_obj.aggregator,  # 汇聚类型,默认mean
+        feature_idx=flags_obj.feature_idx,  # 稠密特征的编号,默认-1
+        feature_dim=flags_obj.feature_dim,  # 稠密特征维度,默认0
         max_id=flags_obj.max_id,
         use_residual=flags_obj.use_residual,
         store_learning_rate=flags_obj.store_learning_rate,
@@ -302,13 +302,13 @@ def run_network_embedding(flags_obj, master, is_chief):
         label_dim=flags_obj.label_dim,
         num_classes=flags_obj.num_classes,
         sigmoid_loss=flags_obj.sigmoid_loss,
-        metapath=metapath,
-        fanouts=fanouts,
+        metapath=metapath,  # python列表,成员为1-D int64 tf.Tensor,每步的边类型集合(多值)
+        fanouts=fanouts,  # python列表,成员为int,每阶的采样个数
         dim=flags_obj.dim,
-        aggregator=flags_obj.aggregator,
-        concat=flags_obj.concat,
-        feature_idx=flags_obj.feature_idx,
-        feature_dim=flags_obj.feature_dim)
+        aggregator=flags_obj.aggregator,  # 汇聚类型,默认mean
+        concat=flags_obj.concat,  # 汇聚方法,默认False
+        feature_idx=flags_obj.feature_idx,  # 稠密特征的编号,默认-1
+        feature_dim=flags_obj.feature_dim)  # 稠密特征维度,默认0
 
   elif flags_obj.model == 'scalable_sage':
     model = models.ScalableSage(
@@ -324,16 +324,16 @@ def run_network_embedding(flags_obj, master, is_chief):
 
   elif flags_obj.model == 'gat':
     model = models.GAT(
-        label_idx=flags_obj.label_idx,
-        label_dim=flags_obj.label_dim,
+        label_idx=flags_obj.label_idx,  # 稠密特征的编号,默认-1
+        label_dim=flags_obj.label_dim,  # 稠密特征维度,默认0
         num_classes=flags_obj.num_classes,
         sigmoid_loss=flags_obj.sigmoid_loss,
         feature_idx=flags_obj.feature_idx,
         feature_dim=flags_obj.feature_dim,
-        max_id=flags_obj.max_id,
+        max_id=flags_obj.max_id,   # int,图中的最大id,默认-1
         head_num=flags_obj.head_num,
-        hidden_dim=flags_obj.dim,
-        nb_num=5)
+        hidden_dim=flags_obj.dim,  # int,隐层宽度,默认128
+        nb_num=5)  # int,相邻顶点采样数,默认5
 
   elif flags_obj.model == 'lshne':
     model = models.LsHNE(-1,[[[0,0,0],[0,0,0]]],-1,128,[1,1],[1,1])

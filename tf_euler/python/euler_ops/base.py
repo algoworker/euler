@@ -98,8 +98,8 @@ def initialize_shared_graph(directory, zk_addr, zk_path, shard_idx, shard_num,
               loader_type='hdfs',
               hdfs_addr=hdfs_addr,
               hdfs_port=hdfs_port,
-              shard_idx=shard_idx,
-              shard_num=shard_num,
+              shard_idx=shard_idx,  # shard从0到num_shards-1编号
+              shard_num=shard_num,  # Euler集群将图切分到多个shard中,每个shard中可以有多个图引擎实例
               zk_addr=zk_addr,
               zk_path=zk_path,
               global_sampler_type=global_sampler_type,
