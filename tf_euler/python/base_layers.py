@@ -42,8 +42,8 @@ class Layer(object):
     self.built = False
 
     if name is None:
-      layer_name = self.__class__.__name__.lower()
-      name = layer_name + '_' + str(get_layer_uid(layer_name))
+      layer_name = self.__class__.__name__.lower()  # 设置layer_name为类名的小写
+      name = layer_name + '_' + str(get_layer_uid(layer_name))  # name: line_1/shallowencoder_1/dense_1/embedding_1
 
     self._name = name
 
@@ -147,7 +147,8 @@ class Embedding(Layer):
 
 class SparseEmbedding(Embedding):
   """
-  Sparse id to dense vector embedding.
+  Sparse id to dense vector embedding.一般应用在id类的embedding,比如nodeid/featureid的embedding.
+  Euler事先把每个节点id都初始化分配一个随机的embedding,SparseEmbedding就是用节点的id去参数矩阵上查询对应节点的embedding.
   """
   def __init__(
       self,

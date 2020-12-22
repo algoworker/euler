@@ -93,10 +93,24 @@ def define_network_embedding_flags():
   tf.flags.DEFINE_string('euler_zk_path', '/tf_euler',
                          'Euler ZK registration node.')  # ZooKeeper节点,分布式训练必须
 
+"""
+euler_ops.sample_node():
+    根据配置顶点类型采样负例
+    count: 0-D(标量) int32 tf.Tensor,采样点数
+    node_type: 0-D int32 tf.Tensor,采样点类型
+    返回 1-D int64 tf.Tensor [count],采样结果
+model(source):
+    所有的Model子类的call方法接受一组源顶点: 1-D tf.Tensor,返回一个四元组ModelOutput(embedding,loss,metric_name,metric)
+    embedding: 2-D tf.Tensor,表示输入所对应的embedding
+    loss: 标量 tf.Tensor,表示输入所对应的loss
+    metric_name: str,表示该模型所用评估指标名称
+    metric: 标量 tf.Tensor,表示模型的评估指标
+    model(source)先调用Layer类中的call(),再调用Model类中的call()
+"""
 def run_train(model, flags_obj, master, is_chief):
   utils_context.training = True
 
-  batch_size = flags_obj.batch_size // model.batch_size_ratio
+  batch_size = flags_obj.batch_size // model.batch_size_ratio  # //: 表示整数除法,这里的batch_size_ratio在类Model的构造方法中被初始化为1
   if flags_obj.model == 'line' or flags_obj.model == 'randomwalk':
     source = euler_ops.sample_node(  # sample_node: 根据配置顶点类型采样负例
         count=batch_size, node_type=flags_obj.all_node_type)  # all_node_type: 全集顶点类型
@@ -104,18 +118,18 @@ def run_train(model, flags_obj, master, is_chief):
     source = euler_ops.sample_node(
         count=batch_size, node_type=flags_obj.train_node_type)  # train_node_type: 训练集顶点类型
   source.set_shape([batch_size])
-  _, loss, metric_name, metric = model(source)
+  _, loss, metric_name, metric = model(source)  # 这里采样得到的source是一个长度为count的vector<euler::common::NodeID>,返回的是一个四元组
 
-  optimizer_class = optimizers.get(flags_obj.optimizer)
-  optimizer = optimizer_class(flags_obj.learning_rate)
-  global_step = tf.train.get_or_create_global_step()
-  train_op = optimizer.minimize(loss, global_step=global_step)
+  optimizer_class = optimizers.get(flags_obj.optimizer)  # type(optimizer_class): function
+  optimizer = optimizer_class(flags_obj.learning_rate)  # type(optimizer_class): <class 'tensorflow.python.training.momentum.MomentumOptimizer'>
+  global_step = tf.train.get_or_create_global_step()  # 记录迭代轮数
+  train_op = optimizer.minimize(loss, global_step=global_step)  # 定义训练过程(优化过程)
 
   hooks = []
 
   tensor_to_log = {'step': global_step, 'loss': loss, metric_name: metric}
   hooks.append(
-      tf.train.LoggingTensorHook(
+      tf.train.LoggingTensorHook(  # tf.train.LoggingTensorHook(): 训练监视器
           tensor_to_log, every_n_iter=flags_obj.log_steps))
 
   num_steps = int((flags_obj.max_id + 1) // flags_obj.batch_size *
@@ -180,7 +194,7 @@ def run_save_embedding(model, flags_obj, master, is_chief):
     dataset = dataset.shard(len(flags_obj.worker_hosts), flags_obj.task_index)
   dataset = dataset.batch(flags_obj.batch_size)  # 将数据组合成batch
   source = dataset.make_one_shot_iterator().get_next()  # dataset.make_one_shot_iterator():从dataset中实例化了一个iterator,这个iterator中的数据输出一次后就丢弃; iterator.get_next():表示从iterator里取出一个元素
-  embedding, _, _, _ = model(source)  # 调用模型得到embedding,这里source应该是一个batch的数据
+  embedding, _, _, _ = model(source)  # 调用模型得到embedding,这里source应该是一个batch的数据,所有的Model子类的call方法接受一组源顶点:1-D tf.Tensor,返回一个四元组ModelOutput(embedding,loss,metric_name,metric)
 
   tf.train.get_or_create_global_step()  # 返回或者创建一个全局步数的tensor
   hooks = []
@@ -202,7 +216,7 @@ def run_save_embedding(model, flags_obj, master, is_chief):
       ids.append(id_)
       embedding_vals.append(embedding_val)
 
-  id_ = np.concatenate(ids)
+  id_ = np.concatenate(ids)  # 一维数组拼接
   embedding_val = np.concatenate(embedding_vals)
 
   if master:
@@ -222,8 +236,8 @@ def run_save_embedding(model, flags_obj, master, is_chief):
 
 def run_network_embedding(flags_obj, master, is_chief):
   fanouts = map(int, flags_obj.fanouts)
-  if flags_obj.mode == 'train':
-    metapath = [map(int, flags_obj.train_edge_type)] * len(fanouts)
+  if flags_obj.mode == 'train':  # metapath是一个list,其中的每个元素仍是一个list
+    metapath = [map(int, flags_obj.train_edge_type)] * len(fanouts)  # map(function, iterable, ...),第一个参数接受一个函数名,后面的参数接受一个或多个可迭代序列,把函数依次作用在list中的每一个元素上,得到一个新的list并返回
   else:
     metapath = [map(int, flags_obj.all_edge_type)] * len(fanouts)
 

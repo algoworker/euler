@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright 2018 Alibaba Group Holding Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +40,7 @@ class ShallowEncoder(layers.Layer):
                **kwargs):
     super(ShallowEncoder, self).__init__(**kwargs)
 
-    if combiner not in ['add', 'concat']:
+    if combiner not in ['add', 'concat']:  # combiner="add"和combiner=“concat": 对不同embedding聚合的方式,类似于一种调参,哪个效果好用哪个
       raise ValueError('combiner must be \'add\' or \'concat\'.')
     if combiner == 'add' and dim is None:
       raise ValueError('add must be used with dim provided.')
@@ -81,7 +83,7 @@ class ShallowEncoder(layers.Layer):
                        'len(sparse_feature_idx)')
 
     # model architechture
-    self.dim = dim
+    self.dim = dim  # encoder的输出维度
     self.use_id = use_id
     self.use_feature = use_feature
     self.use_sparse_feature = use_sparse_feature
@@ -92,7 +94,7 @@ class ShallowEncoder(layers.Layer):
     self.feature_dim = feature_dim
     self.sparse_feature_idx = sparse_feature_idx
     self.sparse_feature_max_id = sparse_feature_max_id
-    self.embedding_dim = embedding_dim
+    self.embedding_dim = embedding_dim  # 每个feature的embedding维度
 
     # sub-layers
     if dim:

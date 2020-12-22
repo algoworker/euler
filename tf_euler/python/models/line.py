@@ -45,8 +45,8 @@ class LINE(base.UnsupervisedModel):
                feature_idx=-1, feature_dim=0, use_id=True,
                sparse_feature_idx=-1, sparse_feature_max_id=-1,
                embedding_dim=16, use_hash_embedding=False, combiner='add',
-               *args, **kwargs):
-    super(LINE, self).__init__(node_type, edge_type, max_id, *args, **kwargs)  # super(类,self).__init__(): 继承父类的构造方法,同样可以使用super().其他方法名,去继承其他方法
+               *args, **kwargs):  # *args: <type 'tuple'>: (), **kwargs: <type 'dict'>: {'xent_loss': True, 'num_negs': 5}
+    super(LINE, self).__init__(node_type, edge_type, max_id, *args, **kwargs)  # super(类,self).__init__(): 继承父类的构造方法,同样可以使用super().其他方法名,去继承其他方法,这里主要是初始化了line模型的基础参数
 
     if order == 1:
       order = 'first'

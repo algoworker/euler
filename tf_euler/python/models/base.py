@@ -107,8 +107,8 @@ class UnsupervisedModel(Model):
 
   def call(self, inputs):
     src, pos, negs = self.to_sample(inputs)
-    embedding = self.target_encoder(src)
-    embedding_pos = self.context_encoder(pos)
+    embedding = self.target_encoder(src)  # _target_encoder是对src节点encode
+    embedding_pos = self.context_encoder(pos)  # _context_encoder是对pos和neg节点encode
     embedding_negs = self.context_encoder(negs)
     loss, mrr = self.decoder(embedding, embedding_pos, embedding_negs)
     embedding = self.target_encoder(inputs)
