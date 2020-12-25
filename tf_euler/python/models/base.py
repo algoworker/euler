@@ -106,7 +106,7 @@ class UnsupervisedModel(Model):
     return loss, mrr
 
   def call(self, inputs):
-    src, pos, negs = self.to_sample(inputs)
+    src, pos, negs = self.to_sample(inputs)  # to_sample(): 对源点使用tf_euler.sample_neighbor采样正例,使用tf_euler.sample_node采样负例
     embedding = self.target_encoder(src)  # _target_encoder是对src节点encode
     embedding_pos = self.context_encoder(pos)  # _context_encoder是对pos和neg节点encode
     embedding_negs = self.context_encoder(negs)

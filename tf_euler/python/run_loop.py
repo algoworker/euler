@@ -222,16 +222,23 @@ def run_save_embedding(model, flags_obj, master, is_chief):
   if master:
     embedding_filename = 'embedding_{}.npy'.format(flags_obj.task_index)
     id_filename = 'id_{}.txt'.format(flags_obj.task_index)
+    vector_filename = 'embedding_{}.vec'.format(flags_obj.task_index)
   else:
     embedding_filename = 'embedding.npy'
     id_filename = 'id.txt'
+    vector_filename = 'embedding.vec'
   embedding_filename = flags_obj.model_dir + '/' + embedding_filename
   id_filename = flags_obj.model_dir + '/' + id_filename
+  vector_filename = flags_obj.model_dir + '/' + vector_filename
 
   with tf.gfile.GFile(embedding_filename, 'w') as embedding_file:
     np.save(embedding_file, embedding_val)
   with tf.gfile.GFile(id_filename, 'w') as id_file:
     id_file.write('\n'.join(map(str, id_)))
+  with tf.gfile.GFile(vector_filename, 'w') as vector_file:
+    [rows, _] = embedding_val.shape
+    for i in range(rows):
+      vector_file.write(' '.join([str(float('%.6f' % x)) for x in embedding_val[i].tolist()]) + '\n')
 
 
 def run_network_embedding(flags_obj, master, is_chief):

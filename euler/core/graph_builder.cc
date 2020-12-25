@@ -89,6 +89,7 @@ Graph* GraphBuilder::BuildGraph(const std::vector<std::string>& file_names,
                                 int32_t port,
                                 GlobalSamplerType global_sampler_type) {
   int THREAD_NUM = std::thread::hardware_concurrency();  // 获取硬件支持的并发线程数
+  LOG(INFO) << "Hardware Concurrency Thread Count: " << THREAD_NUM;
   Graph* graph = factory_->CreateGraph();
   bool load_success = true;
   std::vector<std::thread> thread_list;
@@ -107,7 +108,7 @@ Graph* GraphBuilder::BuildGraph(const std::vector<std::string>& file_names,
       file_list.push_back(file_names[j]);
     }
 
-    //LOG(INFO) << "Thread " << i <<  ", job size: " << file_list.size();
+    LOG(INFO) << "Thread " << i <<  ", job size: " << file_list.size();
     thread_list.push_back(std::thread(
         [this, loader_type, file_list, graph, addr, port,i, &tmp_node_vec, &tmp_edge_vec,
         &n_type_num, &e_type_num] (bool* success) {

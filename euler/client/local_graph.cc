@@ -44,7 +44,7 @@ bool LocalGraph::Initialize(const GraphConfig& config) {
     engine_ = nullptr;
     return false;
   }
-
+  LOG(INFO) << "Initialize local graph engine finish, config: " << config.DebugString();
   return true;
 }
 

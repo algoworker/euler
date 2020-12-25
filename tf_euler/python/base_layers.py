@@ -55,7 +55,7 @@ class Layer(object):
 
   def __call__(self, inputs):
     input_shapes = None
-    if all(hasattr(x, 'shape') for x in nest.flatten(inputs)):
+    if all(hasattr(x, 'shape') for x in nest.flatten(inputs)):  # nest.flatten: 将嵌套结构压平,返回python的list
       input_shapes = nest.map_structure(lambda x: x.shape, inputs)
 
     with tf.variable_scope(self._name):

@@ -91,13 +91,14 @@ void GraphConfig::Remove(const std::string& key) {
 }
 
 std::string GraphConfig::DebugString() const {
-  std::string out = "{\n";
+  std::string out = "{";
   for (auto it = config_.begin(); it != config_.end(); ++it) {
     out.append(it->first);
-    out.append(" = ");
+    out.append("=");
     out.append(it->second);
-    out.append("\n");
+    out.append(" ");
   }
+  out.pop_back();
   out.append("}");
   return out;
 }
