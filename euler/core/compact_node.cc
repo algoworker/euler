@@ -43,6 +43,7 @@ std::vector<euler::common::IDWeightPair>
 CompactNode::SampleNeighbor(
     const std::vector<int32_t>& edge_types,
     int32_t count) const {
+  LOG(INFO) << "Sample neighbor, sample count: " << count;
   std::vector<euler::common::IDWeightPair> err_vec;
   std::vector<euler::common::IDWeightPair> empty_vec;
   std::vector<euler::common::IDWeightPair> vec(count);

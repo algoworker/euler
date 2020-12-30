@@ -64,6 +64,6 @@ void SampleNode::ComputeAsync(OpKernelContext* ctx, DoneCallback done) {
   Graph()->SampleNode(type_value, count_value, callback);
 }
 
-REGISTER_KERNEL_BUILDER(Name("SampleNode").Device(DEVICE_CPU), SampleNode);
+REGISTER_KERNEL_BUILDER(Name("SampleNode").Device(DEVICE_CPU), SampleNode);  // 实现了kernel之后,将op注册到tensorflow系统中
 
 }  // namespace tensorflow

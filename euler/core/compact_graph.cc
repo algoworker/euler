@@ -33,6 +33,7 @@ CompactGraph::SampleNode(int32_t node_type, int32_t count) const {
   if (!global_sampler_ok_) {
     LOG(ERROR) << "global sampler is not initialized!";
   }
+  LOG(INFO) << "Sample node, node type: " << node_type << " sample count: " << count;
   std::vector<euler::common::NodeID> vec;
   vec.reserve(count);  // 改变vec的容量
   if (node_type == -1) {  // 全集顶点类型

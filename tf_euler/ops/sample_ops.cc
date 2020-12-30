@@ -19,6 +19,13 @@ limitations under the License.
 
 namespace tensorflow {
 
+/*
+ * REGISTER_OP宏: REGISTER_OP宏用来定义op的接口,op的名字必须遵循驼峰命名法,这里定义了SampleNode op
+ * SampleNode op: 接受两个int32的tensor(count/node_type)作为输入
+ *                返回一个int64的tensor(nodes)作为输出
+ *                使用了一个shape方法来确保输入和输出的维度是一致的
+ * <name>: <attr-type-expr>: 注册op时可以用Attr方法指定属性的名称和类型,用来定义一个属性
+ */
 REGISTER_OP("SampleNode")
     .Input("count: int32")
     .Input("node_type: int32")

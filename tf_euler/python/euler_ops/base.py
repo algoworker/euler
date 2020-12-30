@@ -29,8 +29,8 @@ _LIB_DIR = os.path.dirname(os.path.realpath(__file__))
 _LIB_CLIENT_PATH = os.path.join(_LIB_DIR, 'libclient.so')
 _LIB_PATH = os.path.join(_LIB_DIR, 'libtf_euler.so')
 
-tf.load_op_library(_LIB_CLIENT_PATH)
-_LIB_OP = tf.load_op_library(_LIB_PATH)
+tf.load_op_library(_LIB_CLIENT_PATH)  # tensorflow的python接口使用tf.load_op_library()函数来加载动态library,并将op注册到tensorflow框架上
+_LIB_OP = tf.load_op_library(_LIB_PATH)  # load_op_library()返回一个python module
 _LIB = ctypes.CDLL(_LIB_PATH)
 
 
