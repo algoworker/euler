@@ -43,7 +43,8 @@ std::vector<euler::common::IDWeightPair>
 CompactNode::SampleNeighbor(
     const std::vector<int32_t>& edge_types,
     int32_t count) const {
-  LOG(INFO) << "Sample neighbor, sample count: " << count;
+  std::string edge_types_str = std::accumulate(edge_types.begin() + 1, edge_types.end(), std::to_string(edge_types[0]), [](const std::string& a, int b) {return a + ' ' + std::to_string(b);});
+  LOG(INFO) << "Sample neighbor, sample count: " << count << ", sample edge types: [" << edge_types_str << "], edge group collection size: " << edge_group_collection_.GetSize();
   std::vector<euler::common::IDWeightPair> err_vec;
   std::vector<euler::common::IDWeightPair> empty_vec;
   std::vector<euler::common::IDWeightPair> vec(count);
@@ -91,15 +92,15 @@ CompactNode::SampleNeighbor(
       edge_type = edge_group_collection_.Sample().first;
     }
     // sample neighbor
-    int32_t interval_idx_begin = edge_type == 0 ? 0 :
+    int32_t interval_idx_begin = edge_type == 0 ? 0 :  // edge_type=0,interval_idx_begin=0,neighbor_groups_idx_.size()=edge_group_num(这里为1)
                                  neighbor_groups_idx_[edge_type - 1];
-    int32_t interval_idx_end = neighbor_groups_idx_[edge_type] - 1;
+    int32_t interval_idx_end = neighbor_groups_idx_[edge_type] - 1;  // neighbor_groups_idx_[]在DeSerialize()时赋值: neighbor_groups_idx_[i]=total_neighbors_num
     size_t mid = euler::common::RandomSelect<euler::common::NodeID>(
-        neighbors_weight_, interval_idx_begin, interval_idx_end);
+        neighbors_weight_, interval_idx_begin, interval_idx_end);  // RandomSelect(): 从顶点的所有邻居顶点中利用二分法进行采样
     float pre_sum_weight = mid <= 0 ? 0 : neighbors_weight_[mid - 1];
     vec[i] = std::make_tuple(neighbors_[mid],
                              neighbors_weight_[mid] - pre_sum_weight,
-                             edge_type);
+                             edge_type);  // make_tuple()创建元组合
   }
   return vec;
 }
@@ -119,7 +120,7 @@ CompactNode::GetFullNeighbor(const std::vector<int32_t>& edge_types) const {
         vec.push_back(
             euler::common::IDWeightPair(neighbors_[j],
                                         neighbors_weight_[j] - pre_sum_weight,
-                                        edge_type));
+                                        edge_type));  // 终点+权重+边类型
       }
     }
   }

@@ -40,7 +40,7 @@ CompactGraph::SampleNode(int32_t node_type, int32_t count) const {
     if (node_type_collection_.GetSumWeight() == 0) {  // euler::common::FastWeightedCollection<int32_t> node_type_collection_;
       return vec;
     }
-    for (int32_t i = 0; i < count; i++) {
+    for (int32_t i = 0; i < count; i++) {  // node_type由-1变成了0
       node_type = node_type_collection_.Sample().first;  // compact graph use binary search sampling, fast graph use alias method sampling
       vec.push_back(node_samplers_[node_type].Sample().first);
     }

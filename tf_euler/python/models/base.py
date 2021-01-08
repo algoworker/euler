@@ -69,11 +69,11 @@ class UnsupervisedModel(Model):
     self.xent_loss = xent_loss
 
   def to_sample(self, inputs):
-    batch_size = tf.size(inputs)
-    src = tf.expand_dims(inputs, -1)
+    batch_size = tf.size(inputs)  # tf.size(): 返回输入张量的大小
+    src = tf.expand_dims(inputs, -1)  # tf.expand_dims(): 给输入的张量增加一个值为1的维度,-1表示从后向前给输入的张量增加一个维度
     pos = euler_ops.sample_neighbor(inputs, self.edge_type, 1,
-                                    self.max_id + 1)[0]
-    negs = euler_ops.sample_node(batch_size * self.num_negs, self.node_type)
+                                    self.max_id + 1)[0]  # 按类型对请求中顶点的出边采样,即从顶点的邻居中采样出正例,sample_neighbor()按照这个node指出去的edge weight进行采样
+    negs = euler_ops.sample_node(batch_size * self.num_negs, self.node_type)  # 按类型对顶点采样,sample_node()按照node weight进行采样
     negs = tf.reshape(negs, [batch_size, self.num_negs])
     return src, pos, negs
 
@@ -106,6 +106,10 @@ class UnsupervisedModel(Model):
     return loss, mrr
 
   def call(self, inputs):
+    """
+    src: 源点信息 pos: 正采样信息 negs: 负采样信息
+    建模的本质是让source跟正样本更加相似,跟负样本更加疏远
+    """
     src, pos, negs = self.to_sample(inputs)  # to_sample(): 对源点使用tf_euler.sample_neighbor采样正例,使用tf_euler.sample_node采样负例
     embedding = self.target_encoder(src)  # _target_encoder是对src节点encode
     embedding_pos = self.context_encoder(pos)  # _context_encoder是对pos和neg节点encode

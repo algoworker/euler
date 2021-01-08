@@ -129,7 +129,7 @@ class ShallowEncoder(layers.Layer):
 
   def call(self, inputs):
     input_shape = inputs.shape
-    inputs = tf.reshape(inputs, [-1])
+    inputs = tf.reshape(inputs, [-1])  # 将inputs扁平化为1维Tensor
     embeddings = []
 
     if self.use_id:

@@ -55,12 +55,12 @@ class Layer(object):
 
   def __call__(self, inputs):
     input_shapes = None
-    if all(hasattr(x, 'shape') for x in nest.flatten(inputs)):  # nest.flatten: 将嵌套结构压平,返回python的list
-      input_shapes = nest.map_structure(lambda x: x.shape, inputs)
+    if all(hasattr(x, 'shape') for x in nest.flatten(inputs)):  # nest.flatten(): 将嵌套结构压平,返回python的list
+      input_shapes = nest.map_structure(lambda x: x.shape, inputs)  # map_structure(): 这里是对inputs里面的每个元素应用lambda表达式函数,x.shape获取x的维度信息
 
     with tf.variable_scope(self._name):
       if not self.built:
-        self.build(input_shapes)
+        self.build(input_shapes)  # input_shapes类型为TensorShape
       outputs = self.call(inputs)
       return outputs
 

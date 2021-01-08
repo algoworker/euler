@@ -26,11 +26,11 @@ limitations under the License.
 namespace euler {
 namespace common {
 
-typedef uint64_t NodeID;
+typedef uint64_t NodeID;  // 顶点ID
 
-typedef std::tuple<NodeID, NodeID, int32_t> EdgeID;
+typedef std::tuple<NodeID, NodeID, int32_t> EdgeID;  // 边ID,由起点/终点/边类型确定
 
-typedef std::tuple<NodeID, float, int32_t> IDWeightPair;
+typedef std::tuple<NodeID, float, int32_t> IDWeightPair;  // 邻居信息,包含终点/权重/边类型
 
 struct EdgeIDHashFunc {
   std::size_t operator()(const EdgeID& key) const {

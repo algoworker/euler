@@ -105,7 +105,7 @@ model(source):
     loss: 标量 tf.Tensor,表示输入所对应的loss
     metric_name: str,表示该模型所用评估指标名称
     metric: 标量 tf.Tensor,表示模型的评估指标
-    model(source)先调用Layer类中的call(),再调用Model类中的call()
+    model(source)先调用Layer类中的__call()__,再调用Model类中的call()
 """
 def run_train(model, flags_obj, master, is_chief):
   utils_context.training = True
