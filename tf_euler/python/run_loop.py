@@ -112,7 +112,7 @@ def run_train(model, flags_obj, master, is_chief):
 
   batch_size = flags_obj.batch_size // model.batch_size_ratio  # //: 表示整数除法,这里的batch_size_ratio在类Model的构造方法中被初始化为1
   if flags_obj.model == 'line' or flags_obj.model == 'randomwalk':
-    source = euler_ops.sample_node(  # sample_node: 根据配置顶点类型采样负例
+    source = euler_ops.sample_node(  # 根据配置的顶点类型使用sample_node()采样出训练样本
         count=batch_size, node_type=flags_obj.all_node_type)  # all_node_type: 全集顶点类型
   else:
     source = euler_ops.sample_node(

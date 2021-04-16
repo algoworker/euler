@@ -48,7 +48,7 @@ FastNode::SampleNeighbor(const std::vector<int32_t>& edge_types,
   std::vector<euler::common::IDWeightPair> err_vec;
   std::vector<euler::common::IDWeightPair> empty_vec;
   std::vector<euler::common::IDWeightPair> vec(count);
-  euler::common::CompactWeightedCollection<int32_t> sub_edge_group_collection_;
+  euler::common::CompactWeightedCollection<int32_t> sub_edge_group_collection_;  // 这里使用CompactWeightedCollection不是bug,github上作者给出了解释: https://github.com/alibaba/euler/issues/123
   if (edge_types.size() > 1 &&
       edge_types.size() < edge_group_collection_.GetSize()) {
     std::vector<std::pair<int32_t, float>> edge_type_weight(edge_types.size());

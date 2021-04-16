@@ -123,7 +123,7 @@ class Embedding(Layer):
   def __init__(self,
                max_id,
                dim,
-               initializer=lambda: tf.truncated_normal_initializer(stddev=0.1),
+               initializer=lambda: tf.truncated_normal_initializer(stddev=0.1),  # 从截断的正态分布中输出随机值,标准差为0.1.
                **kwargs):
     super(Embedding, self).__init__(**kwargs)
     self.max_id = max_id
@@ -142,7 +142,7 @@ class Embedding(Layer):
     inputs = tf.reshape(inputs,[-1])
     output_shape = shape.concatenate(self.dim)
     output_shape = [d if d is not None else -1 for d in output_shape.as_list()]
-    return tf.reshape(tf.nn.embedding_lookup(self.embeddings, inputs),output_shape)
+    return tf.reshape(tf.nn.embedding_lookup(self.embeddings, inputs),output_shape)  # tf.nn.embedding_lookup(params, ids, partition_strategy='mod', max_norm=None),根据ids中的id,寻找params中的第id行,组成一个tensor返回.
 
 
 class SparseEmbedding(Embedding):
